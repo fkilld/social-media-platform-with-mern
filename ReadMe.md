@@ -1,6 +1,6 @@
-### social media platform 
+### social media platform
 
-### features 
+### features
 
 - user can create an account and login
 - user can create posts
@@ -10,7 +10,7 @@
 - user can view comments
 - user can view likes
 
-### technologies 
+### technologies
 
 - express
 - mongoose
@@ -21,7 +21,7 @@
 - bcrypt
 - dotenv
 
-### backend 
+### backend
 
 - create a new post
 - get all posts
@@ -30,7 +30,7 @@
 - delete a post
 - like a post
 
-### frontend 
+### frontend
 
 - create a new post
 - get all posts
@@ -39,14 +39,14 @@
 - delete a post
 - like a post
 
-### database 
+### database
 
 - posts
 - comments
 - likes
 - users
 
-### api 
+### api
 
 - create a new post
 - get all posts
@@ -55,14 +55,14 @@
 - delete a post
 - like a post
 
-### database schema 
+### database schema
 
 - posts
 - comments
 - likes
 - users
 
-### user stories 
+### user stories
 
 - as a user, i want to be able to create an account and login
 - as a user, i want to be able to create posts
@@ -74,62 +74,68 @@
 ### API Endpoints
 
 #### User Authentication
+
 - POST `/api/users/register`
+
   - Body: `{ username, email, password }`
   - Example: `{ "username": "john_doe", "email": "john@example.com", "password": "securepass123" }`
-
 - POST `/api/users/login`
+
   - Body: `{ email, password }`
   - Example: `{ "email": "john@example.com", "password": "securepass123" }`
-
 - GET `/api/users/profile`
+
   - Header: `Authorization: Bearer <token>`
   - Example: `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 
 #### Posts
+
 - POST `/api/posts`
+
   - Header: `Authorization: Bearer <token>`
   - Body: `{ title, content }`
   - Example: `{ "title": "My first post", "content": "This is my first post" }`
-
 - GET `/api/posts`
+
   - Method: GET
   - Description: Retrieves all posts
-
 - GET `/api/posts/:id`
+
   - Method: GET
   - Description: Retrieves a single post by ID
   - Example: `/api/posts/643d6d594d27c427610e0e10`
-
 - PUT `/api/posts/:id`
+
   - Header: `Authorization: Bearer <token>`
   - Body: `{ title, content }`
   - Example: `{ "title": "Updated post", "content": "This is my updated post" }`
-
 - DELETE `/api/posts/:id`
+
   - Header: `Authorization: Bearer <token>`
   - Description: Deletes a post by ID
-
 - POST `/api/posts/:id/like`
+
   - Header: `Authorization: Bearer <token>`
   - Description: Toggles like status on a post
 
 #### Comments
+
 - POST `/api/comments`
+
   - Header: `Authorization: Bearer <token>`
   - Body: `{ content, postId }`
   - Example: `{ "content": "Great post!", "postId": "643d6d594d27c427610e0e10" }`
-
 - GET `/api/comments/post/:postId`
+
   - Description: Retrieves all comments for a specific post
   - Example: `/api/comments/post/643d6d594d27c427610e0e10`
-
 - PUT `/api/comments/:id`
+
   - Header: `Authorization: Bearer <token>`
   - Body: `{ content }`
   - Example: `{ "content": "Updated comment" }`
-
 - DELETE `/api/comments/:id`
+
   - Header: `Authorization: Bearer <token>`
   - Description: Deletes a comment by ID
 
@@ -137,4 +143,4 @@ All protected routes require a valid JWT token in the Authorization header.
 Responses will be in JSON format with appropriate HTTP status codes.
 
 
-
+npm install bcryptjs cookie-parser cors dotenv express jsonwebtoken mongoose

@@ -1,5 +1,6 @@
 // Import express library for creating a server
 const express = require('express')
+const cookieParser = require('cookie-parser')
 // Import cors library for handling cross-origin resource sharing
 const cors = require('cors')
 // Import dotenv library for loading environment variables from .env file
@@ -18,12 +19,19 @@ const commentRoutes = require('./routes/commentRoutes')
 // Create an instance of the express application
 const app = express()
 
+
 // Middleware
 // Use cors middleware to allow cross-origin requests
-app.use(cors())
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // your frontend port
+    credentials: true,
+  })
+)
 // Use express.json middleware to parse JSON bodies in requests
 app.use(express.json())
-
+// Use cookie-parser middleware to parse cookies in requests
+app.use(cookieParser())
 // Routes
 app.use('/api/users', userRoutes)
 app.use('/api/posts', postRoutes)
