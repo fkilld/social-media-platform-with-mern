@@ -16,6 +16,7 @@ router.post('/login', userController.login)
 // Protected routes
 // Get the authenticated user's profile
 router.get('/profile', auth, userController.getProfile)
-
+// Logout a user
+router.post('/logout', userController.logout)
 // Export the router instance for use in the main application file
 module.exports = router

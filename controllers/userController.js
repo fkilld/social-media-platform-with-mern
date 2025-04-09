@@ -2,13 +2,12 @@ const User = require('../models/User')
 const jwt = require('jsonwebtoken')
 
 // Register a new user
-// http://localhost:8000/api/users/register 
+// http://localhost:8000/api/users/register
 // {
 //   "username": "azad",
 //   "email": "azad@gmail.com",
 //   "password": "azad123"
 // }
-
 
 // Export the register function as an async function that takes request and response objects as parameters
 exports.register = async (req, res) => {
@@ -20,7 +19,7 @@ exports.register = async (req, res) => {
     // Using $or operator to match either email or username
     // This prevents duplicate accounts with same credentials
     const existingUser = await User.findOne({ $or: [{ email }, { username }] })
-    
+
     // If user exists, return 400 Bad Request with error message
     // This prevents creating duplicate accounts
     if (existingUser) {
@@ -30,7 +29,7 @@ exports.register = async (req, res) => {
     // Create a new User instance with the provided credentials
     // The password will be automatically hashed by the User model's pre-save hook
     const user = new User({ username, email, password })
-    
+
     // Save the new user to the database
     // This creates the user record and generates an _id
     await user.save()
@@ -45,15 +44,22 @@ exports.register = async (req, res) => {
     // Return success response with status 201 (Created)
     // Include the JWT token for client authentication
     // Return user details excluding sensitive information like password
-    res.status(201).json({
-      message: 'User registered successfully',
-      token,
-      user: {
-        id: user._id,        // MongoDB generated unique identifier
-        username: user.username,  // User's chosen username
-        email: user.email,    // User's email address
-      },
-    })
+    res
+      .cookie('token', token, {
+        httpOnly: true, // prevents client-side JavaScript from accessing the cookie
+        sameSite: 'Lax', // controls where the cookie can be sent from
+        secure: false, // set to true in production with HTTPS
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      })
+      .status(201)
+      .json({
+        message: 'User registered successfully',
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+        },
+      })
   } catch (error) {
     // If any error occurs during the registration process
     // Return 500 Internal Server Error with error details
@@ -64,8 +70,7 @@ exports.register = async (req, res) => {
   }
 }
 
-
-// http://localhost:8000/api/users/login 
+// http://localhost:8000/api/users/login
 // {
 //   "email": "azad@gmail.com",
 //   "password": "azad123"
@@ -81,7 +86,7 @@ exports.login = async (req, res) => {
     // Query database to find a user with the provided email
     // Using findOne since email should be unique in the database
     const user = await User.findOne({ email })
-    
+
     // If no user found with that email, return 401 Unauthorized
     // We use generic "Invalid credentials" message for security (don't reveal if email exists)
     if (!user) {
@@ -91,7 +96,7 @@ exports.login = async (req, res) => {
     // Compare provided password with hashed password stored in database
     // Using comparePassword method defined in User model that uses bcrypt
     const isMatch = await user.comparePassword(password)
-    
+
     // If passwords don't match, return 401 Unauthorized
     // Again using generic message to prevent user enumeration
     if (!isMatch) {
@@ -110,15 +115,22 @@ exports.login = async (req, res) => {
     // - Success message
     // - JWT token for subsequent authenticated requests
     // - User object with non-sensitive user data
-    res.json({
-      message: 'Login successful',
-      token,
-      user: {
-        id: user._id,        // MongoDB's unique identifier for the user
-        username: user.username,  // User's display name
-        email: user.email,    // User's email address
-      },
-    })
+    res
+      .cookie('token', token, {
+        httpOnly: true, // prevents client-side JavaScript from accessing the cookie
+        sameSite: 'Lax', // controls where the cookie can be sent from
+        secure: false, // set to true in production with HTTPS
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      })
+      .status(201)
+      .json({
+        message: 'User logged in successfully',
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+        },
+      })
   } catch (error) {
     // If any error occurs during login process (e.g. database error)
     // Return 500 Internal Server Error with error details
@@ -126,13 +138,13 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: 'Error logging in', error: error.message })
   }
 }
-
-
-// endpoint: http://localhost:8000/api/users/profile 
+exports.logout = (req, res) => {
+  res.clearCookie('token')
+  res.json({ message: 'Logged out successfully' })
+}
+// endpoint: http://localhost:8000/api/users/profile
 // method: GET
 // header: Authorization: Bearer <token>
-
-
 
 // Get user profile
 // Export the getProfile function as an async function that takes request and response objects
@@ -153,7 +165,6 @@ exports.getProfile = async (req, res) => {
     // If user is found, send the user object as JSON response
     // This includes all user fields except password due to the select('-password') above
     res.json(user)
-
   } catch (error) {
     // If any error occurs during the database query or response
     // Return a 500 Internal Server Error status code
