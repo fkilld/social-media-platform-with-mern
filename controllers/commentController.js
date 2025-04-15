@@ -11,6 +11,7 @@ const Post = require('../models/Post')
 
 exports.createComment = async (req, res) => {
   try {
+    // Extract content and postId from request body
     const { content, postId } = req.body
 
     // Check if the post exists
@@ -19,13 +20,14 @@ exports.createComment = async (req, res) => {
       return res.status(404).json({ message: 'Post not found' })
     }
 
-    // Create the comment
+      // Create the comment
     const comment = new Comment({
       content,
       author: req.user.userId, // from auth middleware
       post: postId,
     })
 
+    // Save the comment to the database
     await comment.save()
 
     // Add comment to post's comments array
