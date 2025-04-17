@@ -4,7 +4,7 @@
   "description": "A Node.js API project with Express and MongoDB",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon index.js",
     "dev": "nodemon index.js"
   },
   "devDependencies": {

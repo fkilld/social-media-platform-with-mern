@@ -28,27 +28,86 @@ exports.createPost = async (req, res) => {
 }
 
 // Get all posts
-// endpoint: /api/posts
-// method: GET
+// endpoint: GET /api/posts?page=2&limit=5&search=react
 
+// method: GET
+// Controller function to fetch posts with search, pagination, and author details
 exports.getPosts = async (req, res) => {
   try {
-    // Find all posts and populate the author field with username
-    // populate is used to get the user details from the user model
-    // populate is mongoose method to populate the author field with username
-    // so author is here the _id of the user and username is the field in the user model
-    // sort is used to sort the posts by createdAt in descending order
-    // -1 is used to sort in descending order if we use 1 then it will be in ascending order 
+    // =============================
+    // STEP 1: Extract Query Params
+    // =============================
 
-    const posts = await Post.find()
-      .populate('author', 'username')
-      .sort({ createdAt: -1 })
-    res.json(posts)
+    // Get page number from query (default is 1 if not provided)
+    const page = parseInt(req.query.page) || 1
+
+    // Get limit of items per page (default is 10 if not provided)
+    const limit = parseInt(req.query.limit) || 10
+
+    // Get search keyword (default is empty string which means no filtering)
+    const search = req.query.search || ''
+
+    // =============================
+    // STEP 2: Calculate Skip Value
+    // =============================
+
+    // This determines how many items to skip based on the current page
+    // For example: page 2 with limit 10 → skip = 10 → start from 11th post
+    const skip = (page - 1) * limit
+
+    // =============================
+    // STEP 3: Build Search Query
+    // =============================
+
+    // If search is provided, create a filter to match 'title' or 'content'
+    // The '$regex' with 'i' makes it case-insensitive
+    const searchQuery = search
+      ? {
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { content: { $regex: search, $options: 'i' } },
+          ],
+        }
+      : {}
+
+    // =============================
+    // STEP 4: Count Total Documents
+    // =============================
+
+    // Count total number of posts that match the search query
+    // This is required to calculate pagination data like total pages
+    const total = await Post.countDocuments(searchQuery)
+
+    // =============================
+    // STEP 5: Fetch Filtered Posts
+    // =============================
+
+    const posts = await Post.find(searchQuery) // Apply search query
+      .populate('author', 'username')         // Populate 'author' field with 'username' only
+      .sort({ createdAt: -1 })                // Sort by creation time, newest first
+      .skip(skip)                             // Skip items for pagination
+      .limit(limit)                           // Limit number of items returned
+
+    // =============================
+    // STEP 6: Send Final Response
+    // =============================
+
+    res.json({
+      posts, // List of posts matching search and pagination
+      pagination: {
+        total,                     // Total matching documents
+        page,                      // Current page number
+        pages: Math.ceil(total / limit), // Total number of pages
+        hasMore: page * limit < total,   // True if more pages exist after this
+      },
+    })
+
   } catch (error) {
-    // If there's an error, send a 500 Internal Server Error status with the error message
-    res
-      .status(500)
-      .json({ message: 'Error fetching posts', error: error.message })
+    // If something goes wrong, send 500 error with message and details
+    res.status(500).json({ 
+      message: 'Error fetching posts', 
+      error: error.message 
+    })
   }
 }
 

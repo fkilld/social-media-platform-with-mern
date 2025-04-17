@@ -37,9 +37,18 @@ exports.register = async (req, res) => {
     // Generate a JWT token for authentication
     // The token contains the user's ID and expires in 24 hours
     // JWT_SECRET from environment variables is used to sign the token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '24h',
-    })
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '24h',
+      }
+    )
 
     // Return success response with status 201 (Created)
     // Include the JWT token for client authentication
@@ -107,9 +116,18 @@ exports.login = async (req, res) => {
     // Token contains user ID for future authentication
     // Using JWT_SECRET from environment variables for security
     // Token expires in 24 hours requiring user to login again
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '24h',
-    })
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '24h',
+      }
+    )
 
     // Send successful response with:
     // - Success message
